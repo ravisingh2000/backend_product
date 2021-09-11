@@ -29,11 +29,11 @@ exports.register = async (req, res, next) => {
                 "email": req.body.data.email,
                 "Password": req.body.data.password
             })
-            submit.save();
+            submit.save();}
             res.status(200).json({
                 valid: true
             })
-        }
+        
     }
     catch (e) {
         res.status(401).json({
