@@ -1,39 +1,51 @@
-const nodemailer = require("nodemailer")
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken")
-const students = require("../models/student");
+const User = require("../models/user");
 
 exports.register = async (req, res, next) => {
     console.log(req.body)
 
     try {
-        const data = await students.findOne({ email: req.body.data.email });
-        console.log(data)
+        let data = await User.findOne({ email: req.body.data.email });
+        // console.log(data)
+        // console.log(req.url)
+
         if (data != null && data.Active == false) {
-            req.body.data.password = await bcrypt.hash(req.body.data.password, 10)
-            let mm = await students.updateOne({ email: req.body.data.email }, {
+            console.log("allowed")
+            const salt = await bcrypt.genSalt(10);
+            req.body.data.password = await bcrypt.hash(req.body.data.password, salt)
+            data = await User.findOneAndUpdate({ email: req.body.data.email }, {
                 $set: {
                     "FirstName": req.body.data.firstname,
                     "LastName": req.body.data.lastname,
                     "Password": req.body.data.password
-
                 }
-            }
+            },
+                {
+                    new: true,
+                }
             )
         }
         else {
             console.log("ghjmnbvfrtyuj")
-            const submit = new students({
+            const saveUser = new User({
                 "FirstName": req.body.data.firstname,
                 "LastName": req.body.data.lastname,
                 "email": req.body.data.email,
                 "Password": req.body.data.password
             })
-            submit.save();}
-            res.status(200).json({
-                valid: true
-            })
-        
+            data = await saveUser.save();
+
+        }
+        const token = jwt.sign({
+            email: data.email,
+        }, process.env.SECRET_KEY)
+        console.log()
+        res.status(200).json({
+            valid: true
+            , token: token
+        })
+
     }
     catch (e) {
         res.status(401).json({
@@ -43,75 +55,56 @@ exports.register = async (req, res, next) => {
     }
 
 }
+
 exports.profile = async (req, res) => {
     try {
-        console.log("gggggggggggg")
+        const data = await User.findOne({ email: req.token });
+        res.status(200).json({
+            valid: true,
+            data: data
+        })
+    }
+    catch (error) {
+        res.status(200).json({
+            valid: false
+        })
+    }
 
-        const data = await students.findOne({ email: req.body.data.email });
+}
+exports.login = async (req, res) => {
+    try {
+        console.log("data")
+        const data = await User.findOne({ email: req.body.data.email });
         const bcryptpassword = await bcrypt.compare(req.body.data.password, data.Password);
-        if (bcryptpassword == true) {
-            const token = jwt.sign({ email: req.body.data.email }, "ravisingh")
+        if (data.Active == true && bcryptpassword == true) {
+            const token = jwt.sign({ email: req.body.data.email }, process.env.SECRET_KEY)
             res.cookie("mainproject", token,
-                { maxAge: 31536000000 }
+                {
+                    maxAge: 31536000000
+                    , httpOnly: false,
+                    secure: false,
+                }
             );
             res.status(200).json({
                 bcryptValid: true,
-                data: data
+                data: data,
+                token: token
             })
         }
         else {
-            res.status(401).json(
-                {
-                    bcryptValid: false
-                })
-        }
+            res.sendStatus(401)
     }
+}
     catch (error) {
-        res.json(
-            {
-                bcryptValid: false
-            })
+        res.sendStatus(401)
 
     }
 }
 exports.update = async (req, res, next) => {
 
-    if (req.body.data.password != "") {
-        try {
-            let data = await students.findOne({ email: req.body.data.email });
-            const bcryptpassword = await bcrypt.compare(req.body.data.password, data.Password);
-            if (bcryptpassword == true) {
-                data = await students.findOneAndUpdate({ email: req.body.data.email }, {
-                    $set: {
-                        "FirstName": req.body.data.firstname,
-                        "LastName": req.body.data.lastname,
-                        "email": req.body.data.email,
-                        "Password": req.body.data.password_confirmation,
-                        "College": req.body.data.college
-                    }
-                })
-                res.status(200).json({
-                    bcryptValid: true,
-                    data: data
-                })
-            }
-            else if (bcryptpassword == false) {
-                res.status(401).json({
-                    bcryptValid: false
-                })
-            }
 
-        }
-
-        catch (error) {
-            res.json({
-                bcryptValid: false
-            })
-
-        }
-    }
-    else if (req.body.data.password == "") {
-        data = await students.findOneAndUpdate({ email: req.body.data.email }, {
+    try {
+        data = await User.findOneAndUpdate({ email: req.body.data.email }, {
             $set: {
                 "FirstName": req.body.data.firstname,
                 "LastName": req.body.data.lastname,
@@ -128,7 +121,7 @@ exports.update = async (req, res, next) => {
             data: data
         })
     }
-    else {
+    catch (error) {
         res.json({
             bcryptValid: false
         })

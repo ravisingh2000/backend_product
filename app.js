@@ -10,12 +10,10 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(compression());
 app.use(express.urlencoded({ extended: false }));
-const students = require("./models/student");
+// const students = require("./models/student");
 const userRouter = require("./routes/userApi")
-const validrouter = require("./routes/auth")
 const resumeRouter = require("./routes/resume")
 app.use("/api", userRouter)
-app.use("/api", validrouter)
 app.use("/api", resumeRouter)
 // var corsOption={
 //         origin:"http://localhost:4200"
