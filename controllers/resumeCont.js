@@ -7,7 +7,7 @@ exports.resumeData = async (req, res, next) => {
         // console.log(req.body)
         try {
                 const data = await Resume.findOne({ Gmail: req.token });
-                console.log(data.Education[1])
+                console.log(data)
                 res.status(200).json({ data, token: true })
         }
         catch (e) {

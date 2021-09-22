@@ -20,6 +20,7 @@ router.post("/changepassword", authController.tokenVerify, authController.change
 router.get("/confirmEmail/:name", confirmEmail);
 router.post("/forgotpassword", authController.forgotpassword)
 router.post("/validEmailUser", authController.validEmailUser)
+router.post("/google", authController.google)
 router.post("/getoken", async (req, res) => {
     verify = await jwt.verify(req.body.data, process.env.SECRET_KEY);
     console.log(verify)
@@ -27,8 +28,7 @@ router.post("/getoken", async (req, res) => {
         res.status(200).json({ valid: true, email: verify.data })
     }
     catch (e) {
-
-        res.json({ valid: false })
+        res.status(200).json({ valid: false })
     }
 }
 )
@@ -40,7 +40,7 @@ router.get("/confirmationpage", authController.tokenVerify, async (req, res) => 
         res.status(200).json({ data: data.email })
     }
     catch {
-
+        res.sendStatus(401)
     }
 })
 router.post("/forgotEmailConfirm", sendEmail.transporter, sendEmail.emailtoken, async (req, res) => {
@@ -53,15 +53,23 @@ router.post("/forgotEmailConfirm", sendEmail.transporter, sendEmail.emailtoken, 
         token: token
     })
 })
+router.get("/socialauthpassword", authController.tokenVerify, async (req, res) => {
+    const data = await User.findOne({ email: req.token })
+    console.log(data)
+    if (data.Password == undefined) {
+        res.status(200).json({ email: req.token });
+    }
+    else {
+        res.status(401).send("Unauthorized request");
+    }
+
+})
 router.post("/emailStatus", async (req, res, next) => {
     console.log(req.body.result)
     const data = await User.findOne({ email: req.body.result });
     res.status(200).json({
         data: data
-
     })
-
-
 })
 
 module.exports = router;

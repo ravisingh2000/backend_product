@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const bcrypt = require('bcrypt')
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client("369628387070-p5sv6o4j49cl4ed2id0ggrdrpm9ablpm.apps.googleusercontent.com");
 //verification of authorize token
 exports.tokenVerify = async (req, res, next) => {
 
@@ -51,7 +53,7 @@ exports.changepassword = async (req, res) => {
                 data: data
             })
         }
-        else{
+        else {
             res.sendStatus(401)
         }
 
@@ -69,7 +71,7 @@ exports.forgotpassword = async (req, res) => {
     console.log(req.body)
     const salt = await bcrypt.genSalt(10)
     req.body.password = await bcrypt.hash(req.body.password, salt)
-    data = await User.findOneAndUpdate({ email: req.body.email }, {
+    let data = await User.findOneAndUpdate({ email: req.body.email }, {
         $set: {
             "Password": req.body.password,
         }
@@ -99,7 +101,42 @@ exports.validEmailUser = async (req, res) => {
             res.status(200).json({ value: true })
     }
 }
-exports.google = async (req, res) => {
 
+exports.google = async (req, res) => {
+    
+    console.log(req.body)
+    async function verify() {
+        const ticket = await client.verifyIdToken({
+            idToken: req.body.idToken,
+            audience: "369628387070-p5sv6o4j49cl4ed2id0ggrdrpm9ablpm.apps.googleusercontent.com"
+        });
+        const payload = await ticket.getPayload();
+        return payload
+    }
+    const payLoad = await verify()
+    let userData = await User.findOne({ email: payLoad.email })
+    if (userData == null) {
+        const saveUser = new User({
+            "FirstName": payLoad.given_name,
+            "LastName": payLoad.family_name,
+            "email": payLoad.email,
+            "Active": true
+
+        })
+        data = await saveUser.save();
+        password = true;
+    }
+    else {
+        if (userData.Password) {
+            password = false;
+            
+        }
+        else {
+            password = true;
+        }
+    }
+
+    const token = await jwt.sign({ email:payLoad.email }, process.env.SECRET_KEY)
+    res.status(200).json({ token, password })
 
 }

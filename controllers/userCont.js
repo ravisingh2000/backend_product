@@ -7,7 +7,7 @@ exports.register = async (req, res, next) => {
 
     try {
         let data = await User.findOne({ email: req.body.data.email });
-        // console.log(data)
+        //] console.log(data)
         // console.log(req.url)
 
         if (data != null && data.Active == false) {
@@ -28,12 +28,15 @@ exports.register = async (req, res, next) => {
         }
         else {
             console.log("ghjmnbvfrtyuj")
+            const salt = await bcrypt.genSalt(10);
+            req.body.data.password = await bcrypt.hash(req.body.data.password,salt )
             const saveUser = new User({
                 "FirstName": req.body.data.firstname,
                 "LastName": req.body.data.lastname,
                 "email": req.body.data.email,
                 "Password": req.body.data.password
             })
+            
             data = await saveUser.save();
 
         }
@@ -73,7 +76,7 @@ exports.profile = async (req, res) => {
 }
 exports.login = async (req, res) => {
     try {
-        console.log("data")
+        console.log("datammmmmmmmmmmm")
         const data = await User.findOne({ email: req.body.data.email });
         const bcryptpassword = await bcrypt.compare(req.body.data.password, data.Password);
         if (data.Active == true && bcryptpassword == true) {

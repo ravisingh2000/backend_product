@@ -33,7 +33,7 @@ exports.emailtoken = async (req, res, next) => {
         var message = {
             from: process.env.Email,
             to: req.body.data.email,
-            subject: "Message title",
+            subject: "ResumeBuilder Email Assistance",
             text: "Plaintext version of the message",
             html:
                 `<!-- <p>confirmmail works!</p> -->
@@ -61,7 +61,7 @@ exports.emailtoken = async (req, res, next) => {
         var message = {
             from: "ravisingh11808322@gmail.com",
             to: req.body.data.email,
-            subject: "Message title",
+            subject: "ResumeBuilder Password Assistance",
             text: "Plaintext version of the message",
             html: `<h3>Welcome to resume builder</h3>
             <p><b>click link to reset password: </b>https://newresumebuilder.herokuapp.com/forgotpassword/${expression}</p>
