@@ -20,7 +20,7 @@ app.use("/api", resumeRouter)
 // }
 // app.use(cors(corsOption))
 
-app.use(express.static(__dirname + '/meanstack'));
+app.use(express.static(__dirname + '/client'));
 app.get("/api/signout", async (req, res) => {
         res.clearCookie("mainproject");
         res.clearCookie("resumeToken")
@@ -32,7 +32,7 @@ app.get("/api/signout", async (req, res) => {
 
 app.get('*', function (req, res) {
 
-        res.sendFile(path.join(__dirname + '/meanstack/index.html'));
+        res.sendFile(path.join(__dirname + '/client/index.html'));
 
 });
 app.listen(process.env.PORT || 3000, () => {
