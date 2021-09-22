@@ -103,7 +103,7 @@ exports.validEmailUser = async (req, res) => {
 }
 
 exports.google = async (req, res) => {
-    
+
     console.log(req.body)
     async function verify() {
         const ticket = await client.verifyIdToken({
@@ -129,14 +129,14 @@ exports.google = async (req, res) => {
     else {
         if (userData.Password) {
             password = false;
-            
+
         }
         else {
             password = true;
         }
     }
 
-    const token = await jwt.sign({ email:payLoad.email }, process.env.SECRET_KEY)
+    const token = await jwt.sign({ email: payLoad.email }, process.env.SECRET_KEY)
     res.status(200).json({ token, password })
 
 }

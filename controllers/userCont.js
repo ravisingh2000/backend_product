@@ -29,14 +29,14 @@ exports.register = async (req, res, next) => {
         else {
             console.log("ghjmnbvfrtyuj")
             const salt = await bcrypt.genSalt(10);
-            req.body.data.password = await bcrypt.hash(req.body.data.password,salt )
+            req.body.data.password = await bcrypt.hash(req.body.data.password, salt)
             const saveUser = new User({
                 "FirstName": req.body.data.firstname,
                 "LastName": req.body.data.lastname,
                 "email": req.body.data.email,
                 "Password": req.body.data.password
             })
-            
+
             data = await saveUser.save();
 
         }
@@ -96,8 +96,8 @@ exports.login = async (req, res) => {
         }
         else {
             res.sendStatus(401)
+        }
     }
-}
     catch (error) {
         res.sendStatus(401)
 
